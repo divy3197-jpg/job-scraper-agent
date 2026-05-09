@@ -1,0 +1,70 @@
+# Job Scraper Agent — Divy Kumar Sinha
+# Edit this file to tune searches. No code changes needed.
+
+# Search queries run across all sources
+search:
+  queries:
+    - "management consultant"
+    - "strategy consultant"
+    - "operations consultant"
+    - "digital transformation consultant"
+    - "data ai strategy"
+    - "chief of staff"
+    - "business development consulting"
+    - "transformation manager"
+    - "consulting associate"
+  locations:
+    - "India"
+    - "Hyderabad"
+    - "Mumbai"
+    - "Bangalore"
+  date_range_days: 7
+
+# Pre-filter: blocks obvious mismatches before AI runs (fast, free)
+filters:
+  required_keywords: []      # leave empty = accept all
+  blocked_keywords:
+    - "intern"
+    - "internship"
+    - "fresher"
+    - "entry level"
+    - "0-1 years"
+    - "trainee"
+    - "junior analyst"
+
+# Your priorities — AI uses these to score each job 0-100
+priorities:
+  - "Operations consulting or strategy consulting background"
+  - "IIM or top B-school MBA valued"
+  - "Digital transformation, Gen AI, or Data & AI experience"
+  - "CXO stakeholder management and C-suite presentations"
+  - "Business development and pipeline building in consulting"
+  - "2-5 years total experience (not too senior, not too junior)"
+  - "MBB, Big 4, or top-tier consulting / tech firm"
+  - "India-based, remote-friendly, or global role"
+
+# Storage backend
+storage:
+  provider: "notion"
+
+# Feedback: statuses that teach the AI your preferences over time
+feedback:
+  positive_statuses:
+    - "Saved"
+    - "Applied"
+    - "Interested"
+    - "Strong Match"
+  negative_statuses:
+    - "Skip"
+    - "Rejected"
+    - "Not Relevant"
+    - "Too Senior"
+    - "Too Junior"
+
+# AI enrichment settings
+ai:
+  enabled: true
+  model: "gemini-2.5-flash"
+  min_score: 40         # jobs below this score are dropped before Notion
+  rate_limit_seconds: 7 # seconds between Gemini API calls
+  batch_size: 5         # jobs per API call
