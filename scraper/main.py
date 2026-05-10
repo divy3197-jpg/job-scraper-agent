@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from scraper.sources import indeed, linkedin, naukri
+from scraper.sources import adzuna, linkedin, naukri
 from storage.notion_sync import sync
 
 
@@ -31,13 +31,13 @@ def main():
     # --- Scrape all sources ---
     all_items: list[dict] = []
 
-    print(f"\n[Indeed] Fetching with {len(queries)} queries × {len(locations)} locations...")
+    print(f"\n[Adzuna] Fetching...")
     try:
-        items = indeed.fetch(queries, locations, days)
+        items = adzuna.fetch(days)
         print(f"  → {len(items)} items")
         all_items.extend(items)
     except Exception as e:
-        print(f"  [Indeed] FAILED: {e}")
+        print(f"  [Adzuna] FAILED: {e}")
 
     print(f"\n[LinkedIn] Fetching...")
     try:
