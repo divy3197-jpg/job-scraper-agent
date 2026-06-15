@@ -28,21 +28,22 @@ def fetch(queries: list[str], locations: list[str], days: int = 7) -> list[dict]
     results, seen = [], set()
     f_tpr = _TPR.get(days, "r604800")
 
-    # Limit to 4 query/location combos to stay within rate limits
-    combos = [(q, l) for q in queries[:4] for l in locations[:2]]
+    # Cover more queries/locations and paginate 2 pages each for broader reach.
+    combos = [(q, l) for q in queries[:6] for l in locations[:3]]
     for query, location in combos:
-        for item in _fetch_jobs(query, location, f_tpr):
-            url = item.get("url", "")
-            if url and url not in seen and is_relevant(item.get("title", "")):
-                seen.add(url)
-                results.append(item)
-        time.sleep(3)
+        for start in (0, 25):
+            for item in _fetch_jobs(query, location, f_tpr, start):
+                url = item.get("url", "")
+                if url and url not in seen and is_relevant(item.get("title", "")):
+                    seen.add(url)
+                    results.append(item)
+            time.sleep(2)
 
     return results
 
 
-def _fetch_jobs(query: str, location: str, f_tpr: str) -> list[dict]:
-    params = {"keywords": query, "location": location, "f_TPR": f_tpr, "start": 0}
+def _fetch_jobs(query: str, location: str, f_tpr: str, start: int = 0) -> list[dict]:
+    params = {"keywords": query, "location": location, "f_TPR": f_tpr, "start": start}
     try:
         resp = requests.get(SEARCH_URL, params=params, headers=HEADERS, timeout=15)
         if resp.status_code == 429:

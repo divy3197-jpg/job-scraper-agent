@@ -16,20 +16,27 @@ def _get_client() -> Client:
     return _client
 
 
-def get_existing_urls(db_id: str) -> set[str]:
-    """Fetch all job URLs already in the database (for deduplication)."""
-    client, seen, cursor = _get_client(), set(), None
+def get_existing_keys(db_id: str) -> tuple[set[str], set[tuple[str, str]]]:
+    """Fetch existing job URLs and (title, company) keys for deduplication."""
+    client, urls, keys, cursor = _get_client(), set(), set(), None
     while True:
         kwargs = {"start_cursor": cursor} if cursor else {}
         resp = client.databases.query(database_id=db_id, page_size=100, **kwargs)
         for page in resp.get("results", []):
-            url = page.get("properties", {}).get("URL", {}).get("url") or ""
+            props = page.get("properties", {})
+            url = props.get("URL", {}).get("url") or ""
             if url:
-                seen.add(url)
+                urls.add(url)
+            title_arr = props.get("Name", {}).get("title", [])
+            comp_arr = props.get("Company", {}).get("rich_text", [])
+            title = title_arr[0]["text"]["content"] if title_arr else ""
+            company = comp_arr[0]["text"]["content"] if comp_arr else ""
+            if title:
+                keys.add((title.strip().lower(), company.strip().lower()))
         if not resp.get("has_more"):
             break
         cursor = resp.get("next_cursor")
-    return seen
+    return urls, keys
 
 
 def push_job(db_id: str, job: dict) -> bool:
@@ -95,18 +102,21 @@ def push_job(db_id: str, job: dict) -> bool:
 
 def sync(db_id: str, jobs: list[dict]) -> tuple[int, int]:
     """Sync a list of jobs to Notion. Returns (added, skipped)."""
-    existing = get_existing_urls(db_id)
+    existing_urls, existing_keys = get_existing_keys(db_id)
     added = skipped = 0
 
     for job in jobs:
         url = job.get("url", "")
-        if url and url in existing:
+        key = (job.get("title", "").strip().lower(), job.get("company", "").strip().lower())
+        if (url and url in existing_urls) or (key[0] and key in existing_keys):
             skipped += 1
             continue
         if push_job(db_id, job):
             added += 1
             if url:
-                existing.add(url)
+                existing_urls.add(url)
+            if key[0]:
+                existing_keys.add(key)
         else:
             skipped += 1
 

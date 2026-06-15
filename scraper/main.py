@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from scraper.sources import adzuna, linkedin, naukri
+from scraper.sources import adzuna, linkedin
 from storage.notion_sync import sync
 
 
@@ -47,23 +47,26 @@ def main():
     except Exception as e:
         print(f"  [LinkedIn] FAILED: {e}")
 
-    print(f"\n[Naukri] Fetching...")
-    try:
-        items = naukri.fetch(days)
-        print(f"  → {len(items)} items")
-        all_items.extend(items)
-    except Exception as e:
-        print(f"  [Naukri] FAILED: {e}")
+    # Naukri (bot-protected, 406) and Indeed (IP-blocked) are unwired.
+    # Adzuna covers India once a free API key is added; LinkedIn is the primary source.
 
-    # --- Deduplicate by URL ---
-    seen, deduped = set(), []
+    # --- Deduplicate by URL, then collapse near-dupes by (title + company) ---
+    seen_url, by_url = set(), []
     for item in all_items:
         url = item.get("url", "")
-        if url and url not in seen:
-            seen.add(url)
-            deduped.append(item)
+        if url and url not in seen_url:
+            seen_url.add(url)
+            by_url.append(item)
 
-    print(f"\nTotal unique jobs: {len(deduped)}")
+    seen_key, deduped = set(), []
+    for item in by_url:
+        key = (item.get("title", "").strip().lower(), item.get("company", "").strip().lower())
+        if key in seen_key:
+            continue
+        seen_key.add(key)
+        deduped.append(item)
+
+    print(f"\nTotal unique jobs: {len(deduped)} (after URL + title/company dedup)")
 
     # --- AI Enrichment ---
     if ai_enabled() and deduped:
