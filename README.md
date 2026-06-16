@@ -128,6 +128,25 @@ python enrich_existing.py
 
 ---
 
+## Generate tailored cover letters
+
+For your top-scored jobs, auto-draft a tailored, one-page cover letter using your CV
+and the full job description. Each letter is saved to `applications/` and written into
+the matching Notion page (the "Cover Letter" checkbox is ticked).
+
+```bash
+python generate_cover_letters.py              # top 5 jobs scoring >= 85
+python generate_cover_letters.py --min 90     # only jobs scoring >= 90
+python generate_cover_letters.py --count 10   # top 10
+```
+
+- Skips jobs you've marked Skip/Rejected and jobs that already have a letter
+- Honest by design: it won't invent experience or overstate years — it leans on
+  transferable strengths when there's a gap
+- Tune defaults in `config.yaml` under `cover_letters:`
+
+---
+
 ## Free tier limits
 
 | Service | Free allowance | This agent uses |

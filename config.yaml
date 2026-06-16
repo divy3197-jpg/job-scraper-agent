@@ -68,3 +68,8 @@ ai:
   min_score: 40         # jobs below this score are dropped before Notion
   rate_limit_seconds: 7 # seconds between Gemini API calls
   batch_size: 5         # jobs per API call
+
+# Cover letter generation (python generate_cover_letters.py)
+cover_letters:
+  min_score: 85         # only draft letters for jobs scoring >= this
+  default_count: 5      # how many to draft per run
