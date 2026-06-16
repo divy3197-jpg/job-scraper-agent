@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from scraper.sources import adzuna, linkedin
+from scraper.sources import adzuna, linkedin, pepsico, kpmg
 from storage.notion_sync import sync
 
 
@@ -47,8 +47,25 @@ def main():
     except Exception as e:
         print(f"  [LinkedIn] FAILED: {e}")
 
-    # Naukri (bot-protected, 406) and Indeed (IP-blocked) are unwired.
-    # Adzuna covers India once a free API key is added; LinkedIn is the primary source.
+    print(f"\n[PepsiCo] Fetching...")
+    try:
+        items = pepsico.fetch(days)
+        print(f"  → {len(items)} items")
+        all_items.extend(items)
+    except Exception as e:
+        print(f"  [PepsiCo] FAILED: {e}")
+
+    print(f"\n[KPMG] Fetching...")
+    try:
+        items = kpmg.fetch(days)
+        print(f"  → {len(items)} items")
+        all_items.extend(items)
+    except Exception as e:
+        print(f"  [KPMG] FAILED: {e}")
+
+    # Naukri (bot-protected, 406), Indeed (IP-blocked), and EY (JS-locked Radancy
+    # portal — covered via LinkedIn) are unwired. Adzuna covers India once a free
+    # API key is added; LinkedIn remains the primary source.
 
     # --- Deduplicate by URL, then collapse near-dupes by (title + company) ---
     seen_url, by_url = set(), []
