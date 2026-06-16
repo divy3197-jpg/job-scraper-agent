@@ -90,8 +90,15 @@ def save_to_file(job, letter):
 
 
 def write_to_notion(client, page_id, letter):
-    """Tick the checkbox and append the letter as page content."""
+    """Tick the checkbox and (re)write the letter as page content."""
     client.pages.update(page_id=page_id, properties={"Cover Letter": {"checkbox": True}})
+    # Clear any previously written blocks so re-runs replace instead of duplicate.
+    try:
+        existing = client.blocks.children.list(block_id=page_id, page_size=100)
+        for b in existing.get("results", []):
+            client.blocks.delete(block_id=b["id"])
+    except Exception:
+        pass
     # Notion blocks cap at 2000 chars each — chunk the letter into paragraphs.
     blocks = [{
         "object": "block", "type": "heading_2",

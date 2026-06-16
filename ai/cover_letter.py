@@ -16,21 +16,25 @@ def _generate_text(prompt: str, rate_limit: float = 7.0) -> str:
             f"https://generativelanguage.googleapis.com/v1beta/models"
             f"/{m}:generateContent?key={api_key}"
         )
-        payload = {
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {"temperature": 0.4, "maxOutputTokens": 1200},
-        }
+        gen_cfg = {"temperature": 0.4, "maxOutputTokens": 4096}
+        # 2.5 models spend their token budget on internal "thinking" — disable it
+        # so the full letter fits in the output.
+        if "2.5" in m or "flash-lite-latest" in m:
+            gen_cfg["thinkingConfig"] = {"thinkingBudget": 0}
+        payload = {"contents": [{"parts": [{"text": prompt}]}], "generationConfig": gen_cfg}
         try:
-            resp = requests.post(url, json=payload, timeout=40)
+            resp = requests.post(url, json=payload, timeout=60)
             if resp.status_code == 200:
-                return (
+                parts = (
                     resp.json()
                     .get("candidates", [{}])[0]
                     .get("content", {})
-                    .get("parts", [{}])[0]
-                    .get("text", "")
-                    .strip()
+                    .get("parts", [])
                 )
+                text = "".join(p.get("text", "") for p in parts).strip()
+                if text:
+                    return text
+                continue  # empty (e.g. truncated by thinking) — try next model
             if resp.status_code in (429, 404, 503):
                 time.sleep(2)
                 continue
@@ -66,6 +70,7 @@ Location: {job.get('location', '')}
 - Professional, confident, concise — no clichés, no "I am writing to express my interest in".
 - Around 280-350 words of body text.
 - End with a warm, forward-looking close.
-- Output ONLY the letter body (greeting through sign-off). Do not include the address header or markdown headings.
+- Start the output directly with the greeting ("Dear ...") and end with the sign-off ("Sincerely," / "Warm regards," then the candidate's name).
+- Do NOT include any address block, date line, contact-info header, markdown headings, or placeholder fields in square brackets (no [Date], [Hiring Manager Name], [Candidate Phone], etc.). The contact header is added separately.
 """
     return _generate_text(prompt)
