@@ -27,6 +27,7 @@ def create_database(client: Client, parent_page_id: str) -> str:
                         {"name": "PwC", "color": "yellow"},
                         {"name": "PepsiCo", "color": "blue"},
                         {"name": "KPMG", "color": "purple"},
+                        {"name": "Accenture", "color": "red"},
                         {"name": "Adzuna", "color": "pink"},
                     ]
                 }

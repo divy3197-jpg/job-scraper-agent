@@ -43,8 +43,9 @@ priorities:
   - "MBB, Big 4, or top-tier consulting / tech firm"
   - "India-based, remote-friendly, or global role"
 
-# Active sources: LinkedIn (primary), Amazon, PwC, PepsiCo, KPMG.
-# EY/Deloitte/Google/Apple are JS-locked or API-deprecated but covered via LinkedIn.
+# Active sources: LinkedIn (primary), PepsiCo, KPMG, Accenture (S&C/GN strategy roles).
+# Amazon + PwC have working APIs ready to wire. EY/Deloitte/Google/Apple are
+# JS-locked or API-deprecated but covered via LinkedIn.
 
 # Storage backend
 storage:
