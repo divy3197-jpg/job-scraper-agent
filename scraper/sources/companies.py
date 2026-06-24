@@ -26,6 +26,16 @@ GREENHOUSE = [
     ("Postman", "postman"),
     ("HighRadius", "highradius"),
     ("Druva", "druva"),
+    ("Databricks", "databricks"),
+    ("MongoDB", "mongodb"),
+    ("Okta", "okta"),
+    ("Zscaler", "zscaler"),
+    ("Twilio", "twilio"),
+    ("GitLab", "gitlab"),
+    ("Rubrik", "rubrik"),
+    ("Samsara", "samsara"),
+    ("Coinbase", "coinbase"),
+    ("Roblox", "roblox"),
 ]
 
 LEVER = [
@@ -33,4 +43,10 @@ LEVER = [
     ("Meesho", "meesho"),
     ("CRED", "cred"),
     ("FamPay", "fampay"),
+    ("MindTickle", "mindtickle"),
+]
+
+SMARTRECRUITERS = [
+    # (display_name, company_identifier)
+    ("Bosch", "BoschGroup"),
 ]

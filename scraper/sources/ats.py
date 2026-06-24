@@ -8,7 +8,7 @@ to an MBA strategy/consulting/growth/product profile before returning.
 import time
 import requests
 from datetime import datetime, timezone
-from scraper.sources.companies import WORKDAY, GREENHOUSE, LEVER
+from scraper.sources.companies import WORKDAY, GREENHOUSE, LEVER, SMARTRECRUITERS
 
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"}
 HJ = {**UA, "Content-Type": "application/json", "Accept": "application/json"}
@@ -108,6 +108,30 @@ def _lever(name, token):
     return out
 
 
+def _smartrecruiters(name, company):
+    out = []
+    for kw in ("strategy", "consulting", "growth", "product manager", "business development"):
+        try:
+            r = requests.get(
+                f"https://api.smartrecruiters.com/v1/companies/{company}/postings",
+                params={"country": "in", "limit": 20, "q": kw}, headers=UA, timeout=15,
+            )
+            if r.status_code != 200:
+                continue
+            for j in r.json().get("content", []):
+                if not _relevant(j.get("name", "")):
+                    continue
+                loc = j.get("location", {}) or {}
+                loc_str = ", ".join(x for x in [loc.get("city", ""), "India"] if x)
+                jid = j.get("id", "")
+                out.append(_row(j.get("name", ""), name, loc_str,
+                                f"https://jobs.smartrecruiters.com/{company}/{jid}", "", name))
+            time.sleep(0.4)
+        except requests.RequestException:
+            continue
+    return out
+
+
 def fetch(days: int = 7) -> list[dict]:
     results, seen = [], set()
 
@@ -124,5 +148,7 @@ def fetch(days: int = 7) -> list[dict]:
         add(_greenhouse(name, token))
     for name, token in LEVER:
         add(_lever(name, token))
+    for name, company in SMARTRECRUITERS:
+        add(_smartrecruiters(name, company))
 
     return results
