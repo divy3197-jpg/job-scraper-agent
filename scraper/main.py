@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from scraper.sources import adzuna, linkedin, pepsico, kpmg, accenture
+from scraper.sources import adzuna, linkedin, pepsico, kpmg, accenture, ats
 from storage.notion_sync import sync
 
 
@@ -70,6 +70,14 @@ def main():
         all_items.extend(items)
     except Exception as e:
         print(f"  [Accenture] FAILED: {e}")
+
+    print(f"\n[ATS Companies] Fetching (Mastercard, Adobe, Citi, Meesho, CRED, PhonePe, Groww, ...)...")
+    try:
+        items = ats.fetch(days)
+        print(f"  → {len(items)} items")
+        all_items.extend(items)
+    except Exception as e:
+        print(f"  [ATS] FAILED: {e}")
 
     # Naukri (bot-protected, 406), Indeed (IP-blocked), and EY (JS-locked Radancy
     # portal — covered via LinkedIn) are unwired. Adzuna covers India once a free

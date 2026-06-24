@@ -43,9 +43,11 @@ priorities:
   - "MBB, Big 4, or top-tier consulting / tech firm"
   - "India-based, remote-friendly, or global role"
 
-# Active sources: LinkedIn (primary), PepsiCo, KPMG, Accenture (S&C/GN strategy roles).
-# Amazon + PwC have working APIs ready to wire. EY/Deloitte/Google/Apple are
-# JS-locked or API-deprecated but covered via LinkedIn.
+# Active sources: LinkedIn (primary), PepsiCo, KPMG, Accenture, and a multi-company
+# ATS engine (scraper/sources/ats.py + companies.py) covering major IIM recruiters via
+# Workday (Mastercard, Adobe, Citi), Greenhouse (Stripe, Airbnb, Groww, PhonePe, Postman),
+# and Lever (Meesho, CRED). Add companies in companies.py — no new code needed.
+# EY/Deloitte/Google are JS-locked/API-deprecated but covered via LinkedIn.
 
 # Storage backend
 storage:
