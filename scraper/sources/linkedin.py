@@ -24,12 +24,24 @@ SEARCH_URL = "https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/se
 _TPR = {1: "r86400", 3: "r259200", 7: "r604800", 14: "r1209600", 30: "r2592000"}
 
 
+# Company-targeted boosts — surface roles from firms whose own portals we can't scrape
+# (e.g. TCS is bot-protected). LinkedIn keyword search picks up their postings.
+COMPANY_BOOST = [
+    "Tata Consultancy Services consultant",
+    "TCS strategy consulting",
+    "TCS business analyst",
+]
+
+
 def fetch(queries: list[str], locations: list[str], days: int = 7) -> list[dict]:
     results, seen = [], set()
     f_tpr = _TPR.get(days, "r604800")
 
     # Cover more queries/locations and paginate 2 pages each for broader reach.
     combos = [(q, l) for q in queries[:6] for l in locations[:3]]
+    # Plus company-targeted boosts across the top 2 locations (1 page each).
+    boost_combos = [(q, l, 0) for q in COMPANY_BOOST for l in locations[:2]]
+
     for query, location in combos:
         for start in (0, 25):
             for item in _fetch_jobs(query, location, f_tpr, start):
@@ -38,6 +50,14 @@ def fetch(queries: list[str], locations: list[str], days: int = 7) -> list[dict]
                     seen.add(url)
                     results.append(item)
             time.sleep(2)
+
+    for query, location, start in boost_combos:
+        for item in _fetch_jobs(query, location, f_tpr, start):
+            url = item.get("url", "")
+            if url and url not in seen and is_relevant(item.get("title", "")):
+                seen.add(url)
+                results.append(item)
+        time.sleep(2)
 
     return results
 
