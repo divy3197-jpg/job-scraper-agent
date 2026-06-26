@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-from scraper.sources import adzuna, linkedin, pepsico, kpmg, accenture, ats
+from scraper.sources import adzuna, linkedin, pepsico, kpmg, accenture, ats, infosys
 from storage.notion_sync import sync
 
 
@@ -70,6 +70,14 @@ def main():
         all_items.extend(items)
     except Exception as e:
         print(f"  [Accenture] FAILED: {e}")
+
+    print(f"\n[Infosys] Fetching...")
+    try:
+        items = infosys.fetch(days)
+        print(f"  → {len(items)} items")
+        all_items.extend(items)
+    except Exception as e:
+        print(f"  [Infosys] FAILED: {e}")
 
     print(f"\n[ATS Companies] Fetching (Mastercard, Adobe, Citi, Meesho, CRED, PhonePe, Groww, ...)...")
     try:
