@@ -1,7 +1,8 @@
 """Notion storage — deduplicates by URL and pushes new jobs to your database."""
 import os
+import time
 from notion_client import Client
-from notion_client.errors import APIResponseError
+from notion_client.errors import APIResponseError, RequestTimeoutError, HTTPResponseError
 
 _client = None
 
@@ -21,7 +22,16 @@ def get_existing_keys(db_id: str) -> tuple[set[str], set[tuple[str, str]]]:
     client, urls, keys, cursor = _get_client(), set(), set(), None
     while True:
         kwargs = {"start_cursor": cursor} if cursor else {}
-        resp = client.databases.query(database_id=db_id, page_size=100, **kwargs)
+        resp = None
+        for attempt in range(3):
+            try:
+                resp = client.databases.query(database_id=db_id, page_size=100, **kwargs)
+                break
+            except (RequestTimeoutError, HTTPResponseError) as e:
+                if attempt == 2:
+                    print(f"  [Notion] Query failed after retries: {e}")
+                    return urls, keys  # return what we have; sync still proceeds
+                time.sleep(2 * (attempt + 1))
         for page in resp.get("results", []):
             props = page.get("properties", {})
             url = props.get("URL", {}).get("url") or ""
@@ -89,15 +99,23 @@ def push_job(db_id: str, job: dict) -> bool:
             "rich_text": [{"text": {"content": job["description"][:2000]}}]
         }
 
-    try:
-        _get_client().pages.create(
-            parent={"database_id": db_id},
-            properties=props,
-        )
-        return True
-    except APIResponseError as e:
-        print(f"  [Notion] Push failed for '{job.get('title', '')}': {e}")
-        return False
+    for attempt in range(3):
+        try:
+            _get_client().pages.create(
+                parent={"database_id": db_id},
+                properties=props,
+            )
+            return True
+        except RequestTimeoutError:
+            if attempt < 2:
+                time.sleep(2 * (attempt + 1))  # transient — retry
+                continue
+            print(f"  [Notion] Timeout pushing '{job.get('title', '')}' — skipping")
+            return False
+        except APIResponseError as e:
+            print(f"  [Notion] Push failed for '{job.get('title', '')}': {e}")
+            return False
+    return False
 
 
 def sync(db_id: str, jobs: list[dict]) -> tuple[int, int]:
