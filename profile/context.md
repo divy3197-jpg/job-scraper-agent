@@ -3,6 +3,12 @@
 ## One-line Summary
 Operations & transformation consulting professional, 2+ years. IIM Calcutta MBA. Currently Data & AI Client Engagement Lead at Capgemini North America. B.Tech CS background.
 
+## IMPORTANT — Seniority calibration (read before scoring titles)
+At Capgemini, via the E.L.I.T.E. fast-track program, the candidate holds a **"Manager"** title — but at Capgemini this Manager grade is **equivalent to a "Consultant" role at other firms** (MBB, Big 4, Accenture S&C, etc.). When judging seniority fit, calibrate by SCOPE, not title:
+- "Consultant" / "Senior Consultant" / "Associate" / "Analyst" / "Manager" / "Associate Manager" titles at other firms are all APPROPRIATE, not too senior — score them on content fit, do NOT penalize for seniority.
+- Genuinely too-senior roles are: Senior Manager (7+ yrs), Director, Principal, VP, Partner — only flag THOSE as a seniority stretch.
+- Treat the candidate as having ~2–3 years of post-MBA consulting experience at the Consultant/Manager-equivalent band.
+
 ## Current Role
 **Capgemini — Data & AI Client Engagement Lead** (2024–Present)
 - North America Region, Insights & Data Division
