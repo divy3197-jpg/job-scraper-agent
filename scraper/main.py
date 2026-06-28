@@ -109,7 +109,23 @@ def main():
 
     print(f"\nTotal unique jobs: {len(deduped)} (after URL + title/company dedup)")
 
-    # --- AI Enrichment ---
+    # --- Drop jobs already in Notion BEFORE scoring (saves time + AI quota) ---
+    try:
+        from storage.notion_sync import get_existing_keys
+        existing_urls, existing_keys = get_existing_keys(db_id)
+        fresh = []
+        for item in deduped:
+            url = item.get("url", "")
+            key = (item.get("title", "").strip().lower(), item.get("company", "").strip().lower())
+            if (url and url in existing_urls) or (key[0] and key in existing_keys):
+                continue
+            fresh.append(item)
+        print(f"  → {len(fresh)} are new (not yet in Notion); {len(deduped) - len(fresh)} already exist")
+        deduped = fresh
+    except Exception as e:
+        print(f"  [Notion] Pre-dedup skipped ({e}); will score all")
+
+    # --- AI Enrichment (only the new jobs) ---
     if ai_enabled() and deduped:
         from ai.memory import load_feedback, build_preference_prompt
         from ai.pipeline import analyse_batch
